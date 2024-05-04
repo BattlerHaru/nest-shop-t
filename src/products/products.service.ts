@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
+import { PaginationDTO } from '../common/dtos/pagination.dto';
 
 @Injectable()
 export class ProductsService {
@@ -31,8 +32,14 @@ export class ProductsService {
     }
   }
 
-  async findAll() {
-    const allProducts = await this.productRepository.find();
+  async findAll(paginationDTO: PaginationDTO) {
+
+    const { limit = 10, offset = 0 } = paginationDTO;
+
+    const allProducts = await this.productRepository.find({
+      take: limit,
+      skip: offset
+    });
 
     if (allProducts.length < 1) {
       throw new NotFoundException(`Products not found`)
