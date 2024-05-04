@@ -11,11 +11,9 @@ export class CreateProductDto {
     @IsOptional()
     price?: number
 
-
     @IsString()
     @IsOptional()
     description?: string
-
 
     @IsString()
     @IsOptional()
@@ -25,7 +23,6 @@ export class CreateProductDto {
     @IsPositive()
     @IsOptional()
     stock?: number
-
 
     @IsString({ each: true })
     @IsArray()

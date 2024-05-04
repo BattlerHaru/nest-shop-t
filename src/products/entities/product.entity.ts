@@ -10,6 +10,7 @@ export class Product {
     //     type: 'text',
     //     unique: true
     // })
+
     @Column('text', {
         unique: true
     })
@@ -27,7 +28,7 @@ export class Product {
     description: string
 
     @Column('text', {
-        nullable: true
+        unique: true
     })
     slug: string
 
