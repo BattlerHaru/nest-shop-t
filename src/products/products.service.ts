@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { validate as isUUID } from 'uuid';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
 import { PaginationDTO } from '../common/dtos/pagination.dto';
+import { Product, ProductImage } from './entities';
 
 @Injectable()
 export class ProductsService {
@@ -15,18 +15,27 @@ export class ProductsService {
 
   constructor(
     @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>
+    private readonly productRepository: Repository<Product>,
+
+    @InjectRepository(ProductImage)
+    private readonly productImageRepository: Repository<ProductImage>
   ) { }
 
 
   async create(createProductDto: CreateProductDto) {
 
     try {
-      const newProduct = this.productRepository.create(createProductDto);
+      const { images = [], ...productDetails } = createProductDto
+      const newProduct = this.productRepository.create({
+        ...productDetails,
+        images: images.map(image =>
+          this.productImageRepository.create({ url: image })
+        )
+      });
 
       await this.productRepository.save(newProduct);
 
-      return newProduct;
+      return { ...newProduct, images };
 
     } catch (error) {
       this.handleDBExceptions(error);
@@ -39,7 +48,10 @@ export class ProductsService {
 
     const allProducts = await this.productRepository.find({
       take: limit,
-      skip: offset
+      skip: offset,
+      relations: {
+        images: true,
+      }
     });
 
     if (allProducts.length < 1) {
@@ -47,7 +59,12 @@ export class ProductsService {
 
     }
 
-    return allProducts
+    return allProducts.map(({ images, ...restProduct }) => (
+      {
+        ...restProduct,
+        images: images.map(img => img.url)
+      }
+    ))
 
   }
 
@@ -59,13 +76,15 @@ export class ProductsService {
       product = await this.productRepository.findOneBy({ id: term });
     } else {
 
-      const queryBuilder = this.productRepository.createQueryBuilder();
+      const queryBuilder = this.productRepository.createQueryBuilder('prod');
 
       product = await queryBuilder
         .where(`UPPER(title) =:title or slug =:slug`, {
           title: term.toUpperCase(),
           slug: term.toLowerCase()
-        }).getOne()
+        })
+        .leftJoinAndSelect('prod.images', 'prodImages')
+        .getOne()
 
     }
 
@@ -80,7 +99,8 @@ export class ProductsService {
 
     const product = await this.productRepository.preload({
       id: id,
-      ...updateProductDto
+      ...updateProductDto,
+      images: []
     })
 
     if (!product) {
@@ -103,6 +123,14 @@ export class ProductsService {
 
     await this.productRepository.remove(product)
     return `product with id "${id}" successfully removed`;
+  }
+
+  async findOnePlain(term: string) {
+    const { images = [], ...product } = await this.findOne(term);
+    return {
+      ...product,
+      images: images.map(img => img.url)
+    }
   }
 
   private handleDBExceptions(error: any) {
