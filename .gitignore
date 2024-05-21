@@ -6,6 +6,9 @@
 # DB Postgres
 postgres/
 
+#Files
+static/products
+
 # Logs
 logs
 *.log
