@@ -9,6 +9,9 @@ postgres/
 #Files
 static/products
 
+postman file
+postman/*
+
 # Logs
 logs
 *.log
