@@ -15,8 +15,15 @@ export class AuthService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const user = this.userRepository.create(createUserDto);
+
+      const { password, ...userData } = createUserDto
+
+      const user = this.userRepository.create({
+        ...userData,
+        password: bcrypt.hashSync(password, 10)
+      });
       await this.userRepository.save(user)
+      delete user.password;
       return user
 
     } catch (error) {
