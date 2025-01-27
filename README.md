@@ -17,17 +17,21 @@ yarn install
 4. Up Database
 
 ```bash
+docker-compose up
+
+# or -d for detached mode
+
 docker-compose up -d
 ```
 
-5. seed execute
-
-```
-http://localhost:3000/api/seed
-```
-
-6. Run project
+5. Run project
 
 ```bash
 yarn start:dev
+```
+
+6. seed execute
+
+```
+http://localhost:3000/api/seed
 ```
