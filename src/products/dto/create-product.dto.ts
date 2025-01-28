@@ -1,44 +1,57 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsIn, IsInt, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
 
 export class CreateProductDto {
 
+    @ApiProperty( {
+        description: "Product Title (unique)",
+        nullable: false,
+        minLength: 1
+    } )
     @IsString()
-    @MinLength(1)
+    @MinLength( 1 )
     title: string;
 
+    @ApiProperty()
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    price?: number
+    price?: number;
 
+    @ApiProperty()
     @IsString()
     @IsOptional()
-    description?: string
+    description?: string;
 
+    @ApiProperty()
     @IsString()
     @IsOptional()
-    slug?: string
+    slug?: string;
 
+    @ApiProperty()
     @IsInt()
     @IsPositive()
     @IsOptional()
-    stock?: number
+    stock?: number;
 
-    @IsString({ each: true })
+    @ApiProperty()
+    @IsString( { each: true } )
     @IsArray()
-    sizes: string[]
+    sizes: string[];
 
+    @ApiProperty()
+    @IsIn( [ 'men', 'woman', 'kid', 'unisex' ] )
+    gender: string;
 
-    @IsIn(['men', 'woman', 'kid', 'unisex'])
-    gender: string
-
-    @IsString({ each: true })
-    @IsArray()
-    @IsOptional()
-    tags: string[]
-
-    @IsString({ each: true })
+    @ApiProperty()
+    @IsString( { each: true } )
     @IsArray()
     @IsOptional()
-    images?: string[]
+    tags: string[];
+
+    @ApiProperty()
+    @IsString( { each: true } )
+    @IsArray()
+    @IsOptional()
+    images?: string[];
 }
