@@ -5,13 +5,12 @@ import { SeedService } from './seed.service';
 
 @Controller( 'seed' )
 export class SeedController {
-  constructor( private readonly seedService: SeedService ) { }
+    constructor( private readonly seedService: SeedService ) { }
 
-  @Get()
-  @Auth( ValidRoles.admin )
-
-  executeSeed() {
-    return this.seedService.runSeed();
-  }
+    @Get()
+    //   @Auth( ValidRoles.admin )
+    executeSeed() {
+        return this.seedService.runSeed();
+    }
 
 }
