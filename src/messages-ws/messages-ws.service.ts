@@ -18,8 +18,9 @@ export class MessagesWsService {
         delete this.connectedClients[ clientId ];
     }
 
-    getConnectedClients(): number {
-        return Object.keys( this.connectedClients ).length;
+    // ids
+    getConnectedClients(): string[] {
+        return Object.keys( this.connectedClients );
     }
 
 }
