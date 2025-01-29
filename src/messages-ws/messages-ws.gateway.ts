@@ -1,16 +1,36 @@
+import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { MessagesWsService } from './messages-ws.service';
 import { NewMessageDto } from './dtos/new-message';
+import { JwtPayload } from './../auth/interfaces/jwt-payload.interface';
 
 @WebSocketGateway( { cors: true } )
 export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @WebSocketServer() wss: Server;
 
-  constructor( private readonly messagesWsService: MessagesWsService ) { }
-  handleConnection( client: Socket ) {
-    this.messagesWsService.register( client );
+  constructor(
+    private readonly messagesWsService: MessagesWsService,
+
+    private readonly jwtService: JwtService
+  ) { }
+
+  async handleConnection( client: Socket ) {
+    const token = client.handshake.headers.authentication as string;
+    let payload: JwtPayload;
+
+    try {
+      payload = this.jwtService.verify( token );
+
+      await this.messagesWsService.register( client, payload.id );
+
+    } catch ( error ) {
+      // throw new WsException("invalid")
+      client.disconnect();
+      return;
+    }
+
 
     // ! ejemplo de unirse a una sala 
     // client.join("ventas")
@@ -42,7 +62,7 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
 
     // ! Emite a todos incluyendo al cliente inicial 
     this.wss.emit( 'message-from-server', {
-      fullName: "B",
+      fullName: this.messagesWsService.getUserFullName( client.id ),
       message: payload.message || "no-message!"
     } );
   }
